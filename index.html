@@ -36,9 +36,9 @@
     <div class="section">
         <label>1. 選擇芋頭等級</label>
         <select id="grade" onchange="calculate()">
-            <option value="100" data-name="上品">上品 (最高品質)</option>
-            <option value="70" data-name="中品">中品 (一般)</option>
-            <option value="40" data-name="下品">下品 (加工用)</option>
+            <option value="100" data-name="上品">上品 </option>
+            <option value="70" data-name="中品">中品 </option>
+            <option value="40" data-name="下品">下品 </option>
         </select>
     </div>
 
@@ -108,7 +108,7 @@
             total: document.getElementById('totalDisplay').innerText
         };
 
-        emailjs.send("service_j87feij", "template_1mucf6o", params)
+        emailjs.send("service_j87feij","template_1mucf6o", params)
             .then(function() {
                 alert("訂單已成功寄送到老闆信箱！");
                 btn.disabled = false;
@@ -123,4 +123,5 @@
 </body>
 
 </html>
+
 
