@@ -2,35 +2,48 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>芋頭中盤商訂購系統</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            emailjs.init("YOUR_PUBLIC_KEY"); // 填入您的 Public Key
+        })();
+    </script>
     <style>
-        body { font-family: sans-serif; line-height: 1.6; padding: 20px; background: #f4f4f4; }
-        .container { max-width: 600px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .section { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 10px; }
-        select, input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: #f0ebf4; padding: 20px; }
+        .container { max-width: 500px; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: auto; }
+        h2 { color: #4a148c; text-align: center; }
+        .section { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         .hidden { display: none; }
-        .price-box { background: #e8f5e9; padding: 15px; border-radius: 4px; color: #2e7d32; font-size: 1.2em; font-weight: bold; }
-        .btn { background: #673ab7; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-size: 1em; }
-        .btn:hover { background: #512da8; }
+        .price-box { background: #f3e5f5; padding: 20px; border-radius: 8px; color: #7b1fa2; font-size: 1.3em; font-weight: bold; text-align: center; margin-top: 20px; }
+        .btn { background: #7b1fa2; color: white; padding: 15px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1.1em; margin-top: 15px; }
+        .btn:disabled { background: #ccc; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>芋頭批發訂購系統</h2>
+    <h2>芋頭批發訂購</h2>
     
     <div class="section">
-        <label>第一步：選擇芋頭等級</label>
+        <label>客戶姓名 / 聯絡電話</label>
+        <input type="text" id="customer_info" placeholder="範例：王小明 0912-345678">
+    </div>
+
+    <div class="section">
+        <label>1. 選擇芋頭等級</label>
         <select id="grade" onchange="calculate()">
-            <option value="100">上品 (最高品質)</option>
-            <option value="70">中品 (一般批發)</option>
-            <option value="40">下品 (加工用)</option>
+            <option value="100" data-name="上品">上品 (最高品質)</option>
+            <option value="70" data-name="中品">中品 (一般)</option>
+            <option value="40" data-name="下品">下品 (加工用)</option>
         </select>
     </div>
 
     <div class="section">
-        <label>第二步：初步處理</label>
+        <label>2. 是否需要削皮？</label>
         <select id="peelStatus" onchange="toggleProcessing()">
             <option value="unpeeled">未削皮 (直接出貨)</option>
             <option value="peeled">要削皮 (+10元/斤)</option>
@@ -38,59 +51,74 @@
     </div>
 
     <div id="extraProcessSection" class="section hidden">
-        <label>第三步：細節加工</label>
+        <label>3. 加工手續</label>
         <select id="processType" onchange="calculate()">
-            <option value="0">純削皮 (不切)</option>
-            <option value="5">切塊 (+5元)</option>
-            <option value="15">炸過 (+15元)</option>
-            <option value="20">泥狀 (+20元)</option>
+            <option value="0" data-name="純削皮">純削皮 (不切)</option>
+            <option value="5" data-name="切塊">切塊 (+5元/斤)</option>
+            <option value="15" data-name="炸過">炸過 (+15元/斤)</option>
+            <option value="20" data-name="泥狀">泥狀 (+20元/斤)</option>
         </select>
     </div>
 
     <div class="section">
-        <label>訂購數量 (斤)</label>
-        <input type="number" id="quantity" value="30" min="30" oninput="calculate()">
-        <p><small>* 最低訂購量為 30 斤</small></p>
+        <label>4. 訂購總量 (單位：斤)</label>
+        <input type="number" id="quantity" value="30" min="1" oninput="calculate()">
     </div>
 
-    <div class="price-box" id="totalDisplay">
-        預估總價：$3,000
-    </div>
+    <div class="price-box" id="totalDisplay">預估總價：$3,000</div>
     
-    <button class="btn" onclick="alert('訂單已傳送給老闆，請稍候聯繫！')">提交訂單</button>
+    <button class="btn" id="submitBtn" onclick="sendEmail()">提交訂單並發送郵件</button>
 </div>
 
 <script>
     function toggleProcessing() {
         const peelStatus = document.getElementById('peelStatus').value;
         const extraSection = document.getElementById('extraProcessSection');
-        
-        if (peelStatus === 'peeled') {
-            extraSection.classList.remove('hidden');
-        } else {
-            extraSection.classList.add('hidden');
-            document.getElementById('processType').value = "0";
-        }
+        extraSection.className = (peelStatus === 'peeled') ? 'section' : 'section hidden';
         calculate();
     }
 
     function calculate() {
-        let basePrice = parseInt(document.getElementById('grade').value);
+        let gradeEl = document.getElementById('grade');
         let peelStatus = document.getElementById('peelStatus').value;
-        let processPrice = parseInt(document.getElementById('processType').value);
+        let processEl = document.getElementById('processType');
         let qty = parseInt(document.getElementById('quantity').value) || 0;
 
-        let unitPrice = basePrice;
-        
+        let unitPrice = parseInt(gradeEl.value);
         if (peelStatus === 'peeled') {
-            unitPrice += 10; // 削皮費
-            unitPrice += processPrice; // 後續加工費
+            unitPrice += 10 + parseInt(processEl.value);
         }
 
-        let total = unitPrice * qty;
-        document.getElementById('totalDisplay').innerText = "預估總價：$" + total.toLocaleString();
+        document.getElementById('totalDisplay').innerText = "預估總價：$" + (unitPrice * qty).toLocaleString();
+    }
+
+    function sendEmail() {
+        const btn = document.getElementById('submitBtn');
+        const customer = document.getElementById('customer_info').value;
+        if(!customer) { alert("請填寫聯絡資訊"); return; }
+
+        btn.disabled = true;
+        btn.innerText = "傳送中...";
+
+        const params = {
+            customer: customer,
+            grade: document.getElementById('grade').options[document.getElementById('grade').selectedIndex].text,
+            process: document.getElementById('peelStatus').value === 'unpeeled' ? '未削皮' : document.getElementById('processType').options[document.getElementById('processType').selectedIndex].text,
+            qty: document.getElementById('quantity').value,
+            total: document.getElementById('totalDisplay').innerText
+        };
+
+        emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", params)
+            .then(function() {
+                alert("訂單已成功寄送到老闆信箱！");
+                btn.disabled = false;
+                btn.innerText = "提交訂單並發送郵件";
+            }, function(error) {
+                alert("傳送失敗，請檢查設定或連繫老闆");
+                console.log("FAILED...", error);
+                btn.disabled = false;
+            });
     }
 </script>
-
 </body>
 </html>
