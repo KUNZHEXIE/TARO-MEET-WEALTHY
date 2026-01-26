@@ -20,7 +20,7 @@
 <body>
 
 <div class="order-container">
-    <h1>🍠 芋財訂購 🍠</h1>
+    <h1> 芋財訂購 </h1>
     
     <form id="orderForm">
         <div class="form-group">
@@ -98,7 +98,7 @@
         };
 
         // 使用您提供的 Service ID 和 Template ID
-        emailjs.send("service_j87feij", "template_1mucf6o", params)
+        emailjs.send("service_j87feij","template_1mucf6o", params)
             .then(function() {
                 alert("恭喜！訂單已成功送達給「芋財」。");
                 document.getElementById('orderForm').reset(); // 成功後清空表單
@@ -114,5 +114,6 @@
 
 </body>
 </html>
+
 
 
