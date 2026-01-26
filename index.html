@@ -3,125 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>芋頭中盤商訂購系統</title>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <script type="text/javascript">
-        (function(){
-            emailjs.init("KfbKKphawoTVuTFal"); // 填入您的 Public Key
-        })();
-    </script>
+    <title>芋財訂購系統</title>
     <style>
-        body { font-family: "Microsoft JhengHei", sans-serif; background: #f0ebf4; padding: 20px; }
-        .container { max-width: 500px; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: auto; }
-        h2 { color: #4a148c; text-align: center; }
-        .section { margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
-        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .hidden { display: none; }
-        .price-box { background: #f3e5f5; padding: 20px; border-radius: 8px; color: #7b1fa2; font-size: 1.3em; font-weight: bold; text-align: center; margin-top: 20px; }
-        .btn { background: #7b1fa2; color: white; padding: 15px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1.1em; margin-top: 15px; }
-        .btn:disabled { background: #ccc; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f5f0ff; padding: 20px; display: flex; justify-content: center; }
+        .order-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 600px; width: 100%; border-top: 8px solid #8e67ab; }
+        h1 { text-align: center; color: #5d3b7d; margin-bottom: 25px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #444; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        textarea { height: 100px; resize: vertical; }
+        .section-header { background: #efe6ff; padding: 10px; border-radius: 5px; margin: 20px 0 10px; color: #5d3b7d; font-weight: bold; border-left: 4px solid #8e67ab; }
+        .btn-submit { width: 100%; background-color: #8e67ab; color: white; padding: 15px; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 20px; }
+        .btn-submit:hover { background-color: #6d4a8d; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>芋頭批發訂購</h2>
+<div class="order-container">
+    <h1>🍠 芋財訂購 🍠</h1>
     
-    <div class="section">
-        <label>客戶姓名 / 聯絡電話</label>
-        <input type="text" id="customer_info" placeholder="範例：王小明 0912-345678">
-    </div>
+    <form id="orderForm">
+        <div class="form-group">
+            <label>訂購人姓名：</label>
+            <input type="text" id="userName" placeholder="請輸入姓名" required>
+        </div>
+        <div class="form-group">
+            <label>聯絡電話：</label>
+            <input type="tel" id="userPhone" placeholder="請輸入電話" required>
+        </div>
 
-    <div class="section">
-        <label>1. 選擇芋頭等級</label>
-        <select id="grade" onchange="calculate()">
-            <option value="100" data-name="上品">上品 </option>
-            <option value="70" data-name="中品">中品 </option>
-            <option value="40" data-name="下品">下品 </option>
-        </select>
-    </div>
+        <div class="section-header">【帶皮類】原味選擇</div>
+        <div class="form-group">
+            <label>規格：</label>
+            <select id="peeledOption">
+                <option value="無">不需要</option>
+                <option value="上芋">上芋</option>
+                <option value="中芋">中芋</option>
+                <option value="下芋">下芋</option>
+            </select>
+        </div>
 
-    <div class="section">
-        <label>2. 是否需要削皮？</label>
-        <select id="peelStatus" onchange="toggleProcessing()">
-            <option value="unpeeled">未削皮 (直接出貨)</option>
-            <option value="peeled">要削皮 (+10元/斤)</option>
-        </select>
-    </div>
+        <div class="section-header">【未帶皮】加工方式</div>
+        <div class="form-group">
+            <label>芋角/芋丁/芋泥：</label>
+            <select id="processedOption">
+                <option value="無">不需要</option>
+                <option value="芋角-芋塊">芋角-芋塊</option>
+                <option value="芋丁-10mm">芋丁 (10mm)</option>
+                <option value="芋丁-20mm">芋丁 (20mm)</option>
+                <option value="芋泥">芋泥</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>芋圓系列：</label>
+            <select id="taroBallOption">
+                <option value="無">不需要</option>
+                <option value="大芋圓">大芋圓</option>
+                <option value="小芋圓">小芋圓</option>
+            </select>
+        </div>
 
-    <div id="extraProcessSection" class="section hidden">
-        <label>3. 加工手續</label>
-        <select id="processType" onchange="calculate()">
-            <option value="0" data-name="純削皮">純削皮 (不切)</option>
-            <option value="5" data-name="切塊">切塊 (+5元/斤)</option>
-            <option value="15" data-name="炸過">炸過 (+15元/斤)</option>
-            <option value="20" data-name="泥狀">泥狀 (+20元/斤)</option>
-        </select>
-    </div>
+        <div class="section-header">收件資訊與備註</div>
+        <div class="form-group">
+            <label>配送地址及注意事項：</label>
+            <textarea id="remarks" placeholder="請輸入詳細地址、期望到貨時間或其他需求"></textarea>
+        </div>
 
-    <div class="section">
-        <label>4. 訂購總量 (單位：斤)</label>
-        <input type="number" id="quantity" value="30" min="1" oninput="calculate()">
-    </div>
-
-    <div class="price-box" id="totalDisplay">預估總價：$3,000</div>
-    
-    <button class="btn" id="submitBtn" onclick="sendEmail()">提交訂單並發送郵件</button>
+        <button type="button" class="btn-submit" onclick="sendEmail()">提交訂單 (發送 Email)</button>
+    </form>
 </div>
 
 <script>
-    function toggleProcessing() {
-        const peelStatus = document.getElementById('peelStatus').value;
-        const extraSection = document.getElementById('extraProcessSection');
-        extraSection.className = (peelStatus === 'peeled') ? 'section' : 'section hidden';
-        calculate();
+function sendEmail() {
+    // 獲取欄位資料
+    const name = document.getElementById('userName').value;
+    const phone = document.getElementById('userPhone').value;
+    const peeled = document.getElementById('peeledOption').value;
+    const processed = document.getElementById('processedOption').value;
+    const taroBall = document.getElementById('taroBallOption').value;
+    const remarks = document.getElementById('remarks').value;
+
+    if(!name || !phone) {
+        alert("請填寫姓名與電話！");
+        return;
     }
 
-    function calculate() {
-        let gradeEl = document.getElementById('grade');
-        let peelStatus = document.getElementById('peelStatus').value;
-        let processEl = document.getElementById('processType');
-        let qty = parseInt(document.getElementById('quantity').value) || 0;
+    // 設定收件信箱（請在此修改為您的 Gmail）
+    const targetEmail = "your-email@gmail.com"; 
+    
+    // 組合郵件內容
+    const subject = encodeURIComponent("【芋財訂購單】" + name);
+    let body = `訂購人姓名：${name}%0D%0A`;
+    body += `聯絡電話：${phone}%0D%0A`;
+    body += `--- 訂購品項 ---%0D%0A`;
+    body += `帶皮選項：${peeled}%0D%0A`;
+    body += `加工選項：${processed}%0D%0A`;
+    body += `芋圓系列：${taroBall}%0D%0A`;
+    body += `--- 備註與地址 ---%0D%0A`;
+    body += `${remarks}%0D%0A`;
 
-        let unitPrice = parseInt(gradeEl.value);
-        if (peelStatus === 'peeled') {
-            unitPrice += 10 + parseInt(processEl.value);
-        }
-
-        document.getElementById('totalDisplay').innerText = "預估總價：$" + (unitPrice * qty).toLocaleString();
-    }
-
-    function sendEmail() {
-        const btn = document.getElementById('submitBtn');
-        const customer = document.getElementById('customer_info').value;
-        if(!customer) { alert("請填寫聯絡資訊"); return; }
-
-        btn.disabled = true;
-        btn.innerText = "傳送中...";
-
-        const params = {
-            customer: customer,
-            grade: document.getElementById('grade').options[document.getElementById('grade').selectedIndex].text,
-            process: document.getElementById('peelStatus').value === 'unpeeled' ? '未削皮' : document.getElementById('processType').options[document.getElementById('processType').selectedIndex].text,
-            qty: document.getElementById('quantity').value,
-            total: document.getElementById('totalDisplay').innerText
-        };
-
-        emailjs.send("service_j87feij","template_1mucf6o", params)
-            .then(function() {
-                alert("訂單已成功寄送到老闆信箱！");
-                btn.disabled = false;
-                btn.innerText = "提交訂單並發送郵件";
-            }, function(error) {
-                alert("傳送失敗，請檢查設定或連繫老闆");
-                console.log("FAILED...", error);
-                btn.disabled = false;
-            });
-    }
+    // 跳轉至 Gmail/信箱軟體
+    window.location.href = `mailto:${targetEmail}?subject=${subject}&body=${body}`;
+}
 </script>
-</body>
 
+</body>
 </html>
 
 
