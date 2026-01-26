@@ -99,7 +99,7 @@
         // 偵錯用：可以在 Console 查看抓到的資料
         console.log("寄送資料：", params);
 
-        emailjs.send("service_j87feij", "template_1mucf6o", params)
+        emailjs.send("service_j87feij","template_1mucf6o", params)
             .then(function() {
                 alert("訂單已成功寄送到老闆信箱！");
                 btn.disabled = false;
@@ -117,3 +117,4 @@
 
 </body>
 </html>
+
