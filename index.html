@@ -32,9 +32,9 @@
             <input type="tel" id="userPhone" placeholder="請輸入電話" required>
         </div>
 
-        <div class="section-header">【帶皮類】原味選擇</div>
+        <div class="section-header">【帶皮】規格選擇</div>
         <div class="form-group">
-            <label>規格：</label>
+            <label>品項：</label>
             <select id="peeledOption">
                 <option value="無">不需要</option>
                 <option value="上芋">上芋</option>
@@ -45,12 +45,13 @@
 
         <div class="section-header">【未帶皮】加工方式</div>
         <div class="form-group">
-            <label>芋角/芋丁/芋泥：</label>
+            <label>芋角/芋丁/芋泥/芋條：</label>
             <select id="processedOption">
                 <option value="無">不需要</option>
                 <option value="芋角-芋塊">芋角-芋塊</option>
                 <option value="芋丁-10mm">芋丁 (10mm)</option>
                 <option value="芋丁-20mm">芋丁 (20mm)</option>
+                <option value="芋條">芋條</option>
                 <option value="芋泥">芋泥</option>
             </select>
         </div>
@@ -63,48 +64,52 @@
             </select>
         </div>
 
-        <div class="section-header">收件資訊與備註</div>
-        <div class="form-group">
-            <label>配送地址及注意事項：</label>
-            <textarea id="remarks" placeholder="請輸入詳細地址、期望到貨時間或其他需求"></textarea>
+        <div class="section">
+            <div class="section-title">收件與備註</div>
+            <textarea id="remarks" placeholder="請輸入配送地址與注意事項..."></textarea>
         </div>
 
-        <button type="button" class="btn-submit" onclick="sendEmail()">提交訂單 (發送 Email)</button>
+        <button type="button" class="btn" id="submitBtn" onclick="sendEmail()">確認提交訂單</button>
     </form>
 </div>
 
 <script>
-function sendEmail() {
-    // 獲取欄位資料
-    const name = document.getElementById('userName').value;
-    const phone = document.getElementById('userPhone').value;
-    const peeled = document.getElementById('peeledOption').value;
-    const processed = document.getElementById('processedOption').value;
-    const taroBall = document.getElementById('taroBallOption').value;
-    const remarks = document.getElementById('remarks').value;
+    function sendEmail() {
+        const btn = document.getElementById('submitBtn');
+        const name = document.getElementById('user_name').value;
+        const phone = document.getElementById('user_phone').value;
 
-    if(!name || !phone) {
-        alert("請填寫姓名與電話！");
-        return;
+        if(!name || !phone) {
+            alert("請填寫姓名與電話！");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "訂單傳送中...";
+
+        // 這裡的 key 必須與您 EmailJS 後台 Template 設定的 {{變數名稱}} 一致
+        const params = {
+            customer: name,           // 對應範本中的 {{customer}}
+            phone: phone,             // 對應範本中的 {{phone}}
+            peeled: document.getElementById('peeled_grade').value,
+            processed: document.getElementById('processed_type').value,
+            taro_ball: document.getElementById('taro_ball').value,
+            remarks: document.getElementById('remarks').value || "無"
+        };
+
+        // 使用您提供的 Service ID 和 Template ID
+        emailjs.send("service_j87feij", "template_1mucf6o", params)
+            .then(function() {
+                alert("恭喜！訂單已成功送達給「芋財」。");
+                document.getElementById('orderForm').reset(); // 成功後清空表單
+                btn.disabled = false;
+                btn.innerText = "確認提交訂單";
+            }, function(error) {
+                alert("傳送失敗，請聯繫老闆！錯誤訊息：" + JSON.stringify(error));
+                btn.disabled = false;
+                btn.innerText = "確認提交訂單";
+            });
     }
-
-    // 設定收件信箱（請在此修改為您的 Gmail）
-    const targetEmail = "your-email@gmail.com"; 
-    
-    // 組合郵件內容
-    const subject = encodeURIComponent("【芋財訂購單】" + name);
-    let body = `訂購人姓名：${name}%0D%0A`;
-    body += `聯絡電話：${phone}%0D%0A`;
-    body += `--- 訂購品項 ---%0D%0A`;
-    body += `帶皮選項：${peeled}%0D%0A`;
-    body += `加工選項：${processed}%0D%0A`;
-    body += `芋圓系列：${taroBall}%0D%0A`;
-    body += `--- 備註與地址 ---%0D%0A`;
-    body += `${remarks}%0D%0A`;
-
-    // 跳轉至 Gmail/信箱軟體
-    window.location.href = `mailto:${targetEmail}?subject=${subject}&body=${body}`;
-}
 </script>
 
 </body>
