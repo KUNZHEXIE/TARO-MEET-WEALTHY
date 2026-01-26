@@ -4,9 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>芋財訂購系統</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            // 您的 Public Key
+            emailjs.init("KfbKKphawoTVuTFal"); 
+        })();
+    </script>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f5f0ff; padding: 20px; display: flex; justify-content: center; }
         .order-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 600px; width: 100%; border-top: 8px solid #8e67ab; }
+        .header-img { width: 100%; border-radius: 10px; margin-bottom: 15px; }
         h1 { text-align: center; color: #5d3b7d; margin-bottom: 25px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #444; }
@@ -18,28 +26,21 @@
     </style>
 </head>
 <body>
-<script type="text/javascript">
-    (function(){
-        // 在這裡的引號內填入你的 Public Key
-        emailjs.init("KfbKKphawoTVuTFal"); 
-    })();
+
 <div class="order-container">
-    <h1> 芋財訂購 </h1>
+    <img src="https://image_generation_content/2" class="header-img" alt="芋財訂購">
+    
+    <h1>芋財訂購</h1>
     
     <form id="orderForm">
         <div class="form-group">
-            <label>訂購人姓名：</label>
-            <input type="text" id="userName" placeholder="請輸入姓名" required>
-        </div>
-        <div class="form-group">
-            <label>聯絡電話：</label>
-            <input type="tel" id="userPhone" placeholder="請輸入電話" required>
+            <label>訂購人姓名 / 聯絡電話：</label>
+            <input type="text" id="customer_info" placeholder="範例：王小明 0912-345678" required>
         </div>
 
         <div class="section-header">【帶皮】規格選擇</div>
         <div class="form-group">
-            <label>品項：</label>
-            <select id="peeledOption">
+            <select id="grade">
                 <option value="無">不需要</option>
                 <option value="上芋">上芋</option>
                 <option value="中芋">中芋</option>
@@ -49,8 +50,8 @@
 
         <div class="section-header">【未帶皮】加工方式</div>
         <div class="form-group">
-            <label>芋角/芋丁/芋泥/芋條：</label>
-            <select id="processedOption">
+            <label>加工細項 (芋角/芋丁/芋泥/芋條)：</label>
+            <select id="processType">
                 <option value="無">不需要</option>
                 <option value="芋角-芋塊">芋角-芋塊</option>
                 <option value="芋丁-10mm">芋丁 (10mm)</option>
@@ -59,67 +60,63 @@
                 <option value="芋泥">芋泥</option>
             </select>
         </div>
+        
         <div class="form-group">
             <label>芋圓系列：</label>
-            <select id="taroBallOption">
+            <select id="taroBall">
                 <option value="無">不需要</option>
                 <option value="大芋圓">大芋圓</option>
                 <option value="小芋圓">小芋圓</option>
             </select>
         </div>
 
-    <div class="section">
-        <div class="section-title">3. 地址與備註</div>
-        <textarea id="remarks" placeholder="請輸入配送地址與注意事項..."></textarea>
-    </div>
+        <div class="section-header">收件地址與備註</div>
+        <div class="form-group">
+            <textarea id="remarks" placeholder="請輸入詳細地址、期望到貨時間或特殊注意事項..."></textarea>
+        </div>
 
-    <button class="btn" id="submitBtn" onclick="sendEmail()">提交訂單並發送郵件</button>
+        <button type="button" class="btn-submit" id="submitBtn" onclick="sendEmail()">提交訂單並發送郵件</button>
+    </form>
 </div>
-
 
 <script>
     function sendEmail() {
         const btn = document.getElementById('submitBtn');
         const customer = document.getElementById('customer_info').value;
 
-        // 檢查是否填寫基本資訊
         if(!customer) { 
-            alert("請填寫聯絡資訊 (姓名與電話)"); 
+            alert("⚠️ 請填寫聯絡資訊 (姓名與電話)"); 
             return; 
         }
 
         btn.disabled = true;
-        btn.innerText = "傳送中...";
+        btn.innerText = "訂單傳送中...";
 
-        // 按照您要求的邏輯抓取數值
+        // 資料打包 (名稱需對應 EmailJS 後台 {{變數}})
         const params = {
             customer: customer,
-            // 抓取下拉選單顯示的文字
             grade: document.getElementById('grade').options[document.getElementById('grade').selectedIndex].text,
             process: document.getElementById('processType').options[document.getElementById('processType').selectedIndex].text,
             taroBall: document.getElementById('taroBall').options[document.getElementById('taroBall').selectedIndex].text,
             remarks: document.getElementById('remarks').value || "無"
         };
 
-        // 偵錯用：可以在 Console 查看抓到的資料
-        console.log("寄送資料：", params);
-
-        emailjs.send("service_j87feij","template_1mucf6o", params)
+        // 發送至您的 EmailJS Service
+        emailjs.send("service_j87feij", "template_1mucf6o", params)
             .then(function() {
-                alert("訂單已成功寄送到老闆信箱！");
+                alert("✅ 訂單已成功寄送到老闆信箱！");
+                document.getElementById('orderForm').reset();
                 btn.disabled = false;
                 btn.innerText = "提交訂單並發送郵件";
-                // 選項：成功後清空表單
-                // location.reload();
             }, function(error) {
-                alert("傳送失敗，請檢查設定或連繫老闆");
+                alert("❌ 傳送失敗，請檢查網路或 EmailJS 設定。");
                 console.log("FAILED...", error);
                 btn.disabled = false;
                 btn.innerText = "提交訂單並發送郵件";
             });
     }
 </script>
-</script>
+
 </body>
 </html>
 
