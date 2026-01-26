@@ -64,48 +64,53 @@
             </select>
         </div>
 
-        <div class="section">
-            <div class="section-title">收件與備註</div>
-            <textarea id="remarks" placeholder="請輸入配送地址與注意事項..."></textarea>
-        </div>
+       <div class="section">
+                <div class="section-title">收件與備註</div>
+                <textarea id="remarks" placeholder="請輸入配送地址與注意事項..."></textarea>
+            </div>
 
-        <button type="button" class="btn" id="submitBtn" onclick="sendEmail()">確認提交訂單</button>
-    </form>
+            <button type="button" class="btn" id="submitBtn" onclick="sendEmail()">確認提交訂單</button>
+        </form>
+    </div>
 </div>
 
 <script>
     function sendEmail() {
         const btn = document.getElementById('submitBtn');
-        const name = document.getElementById('user_name').value;
-        const phone = document.getElementById('user_phone').value;
+        
+        // 抓取欄位時增加安全檢查
+        const field_name = document.getElementById('user_name');
+        const field_phone = document.getElementById('user_phone');
+        const field_peeled = document.getElementById('peeled_grade');
+        const field_processed = document.getElementById('processed_type');
+        const field_taro = document.getElementById('taro_ball');
+        const field_remarks = document.getElementById('remarks');
 
-        if(!name || !phone) {
-            alert("請填寫姓名與電話！");
+        if(!field_name.value || !field_phone.value) {
+            alert("⚠️ 請填寫姓名與電話！");
             return;
         }
 
         btn.disabled = true;
         btn.innerText = "訂單傳送中...";
 
-        // 這裡的 key 必須與您 EmailJS 後台 Template 設定的 {{變數名稱}} 一致
         const params = {
-            customer: name,           // 對應範本中的 {{customer}}
-            phone: phone,             // 對應範本中的 {{phone}}
-            peeled: document.getElementById('peeled_grade').value,
-            processed: document.getElementById('processed_type').value,
-            taro_ball: document.getElementById('taro_ball').value,
-            remarks: document.getElementById('remarks').value || "無"
+            customer: field_name.value,
+            phone: field_phone.value,
+            peeled: field_peeled.value,
+            processed: field_processed.value,
+            taro_ball: field_taro.value,
+            remarks: field_remarks.value || "無"
         };
 
-        // 使用您提供的 Service ID 和 Template ID
-        emailjs.send("service_j87feij","template_1mucf6o", params)
+        emailjs.send("service_j87feij", "template_1mucf6o", params)
             .then(function() {
-                alert("恭喜！訂單已成功送達給「芋財」。");
-                document.getElementById('orderForm').reset(); // 成功後清空表單
+                alert("✅ 訂單已成功送達！");
+                document.getElementById('orderForm').reset();
                 btn.disabled = false;
                 btn.innerText = "確認提交訂單";
             }, function(error) {
-                alert("傳送失敗，請聯繫老闆！錯誤訊息：" + JSON.stringify(error));
+                alert("❌ 傳送失敗，請重試！\n原因：" + JSON.stringify(error));
                 btn.disabled = false;
                 btn.innerText = "確認提交訂單";
             });
