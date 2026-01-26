@@ -64,61 +64,56 @@
             </select>
         </div>
 
-       <div class="section">
-                <div class="section-title">收件與備註</div>
-                <textarea id="remarks" placeholder="請輸入配送地址與注意事項..."></textarea>
-            </div>
-
-            <button type="button" class="btn" id="submitBtn" onclick="sendEmail()">確認提交訂單</button>
-        </form>
+    <div class="section">
+        <div class="section-title">3. 地址與備註</div>
+        <textarea id="remarks" placeholder="請輸入配送地址與注意事項..."></textarea>
     </div>
+
+    <button class="btn" id="submitBtn" onclick="sendEmail()">提交訂單並發送郵件</button>
 </div>
 
 <script>
     function sendEmail() {
         const btn = document.getElementById('submitBtn');
-        
-        // 抓取欄位時增加安全檢查
-        const field_name = document.getElementById('user_name');
-        const field_phone = document.getElementById('user_phone');
-        const field_peeled = document.getElementById('peeled_grade');
-        const field_processed = document.getElementById('processed_type');
-        const field_taro = document.getElementById('taro_ball');
-        const field_remarks = document.getElementById('remarks');
+        const customer = document.getElementById('customer_info').value;
 
-        if(!field_name.value || !field_phone.value) {
-            alert("⚠️ 請填寫姓名與電話！");
-            return;
+        // 檢查是否填寫基本資訊
+        if(!customer) { 
+            alert("請填寫聯絡資訊 (姓名與電話)"); 
+            return; 
         }
 
         btn.disabled = true;
-        btn.innerText = "訂單傳送中...";
+        btn.innerText = "傳送中...";
 
+        // 按照您要求的邏輯抓取數值
         const params = {
-            customer: field_name.value,
-            phone: field_phone.value,
-            peeled: field_peeled.value,
-            processed: field_processed.value,
-            taro_ball: field_taro.value,
-            remarks: field_remarks.value || "無"
+            customer: customer,
+            // 抓取下拉選單顯示的文字
+            grade: document.getElementById('grade').options[document.getElementById('grade').selectedIndex].text,
+            process: document.getElementById('processType').options[document.getElementById('processType').selectedIndex].text,
+            taroBall: document.getElementById('taroBall').options[document.getElementById('taroBall').selectedIndex].text,
+            remarks: document.getElementById('remarks').value || "無"
         };
+
+        // 偵錯用：可以在 Console 查看抓到的資料
+        console.log("寄送資料：", params);
 
         emailjs.send("service_j87feij", "template_1mucf6o", params)
             .then(function() {
-                alert("✅ 訂單已成功送達！");
-                document.getElementById('orderForm').reset();
+                alert("訂單已成功寄送到老闆信箱！");
                 btn.disabled = false;
-                btn.innerText = "確認提交訂單";
+                btn.innerText = "提交訂單並發送郵件";
+                // 選項：成功後清空表單
+                // location.reload();
             }, function(error) {
-                alert("❌ 傳送失敗，請重試！\n原因：" + JSON.stringify(error));
+                alert("傳送失敗，請檢查設定或連繫老闆");
+                console.log("FAILED...", error);
                 btn.disabled = false;
-                btn.innerText = "確認提交訂單";
+                btn.innerText = "提交訂單並發送郵件";
             });
     }
 </script>
 
 </body>
 </html>
-
-
-
