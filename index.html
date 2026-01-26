@@ -18,7 +18,11 @@
     </style>
 </head>
 <body>
-
+<script type="text/javascript">
+    (function(){
+        // 在這裡的引號內填入你的 Public Key
+        emailjs.init("KfbKKphawoTVuTFal"); 
+    })();
 <div class="order-container">
     <h1> 芋財訂購 </h1>
     
@@ -71,12 +75,8 @@
 
     <button class="btn" id="submitBtn" onclick="sendEmail()">提交訂單並發送郵件</button>
 </div>
-<script type="text/javascript">
-    (function(){
-        // 在這裡的引號內填入你的 Public Key
-        emailjs.init("KfbKKphawoTVuTFal"); 
-    })();
-</script>
+
+
 <script>
     function sendEmail() {
         const btn = document.getElementById('submitBtn');
@@ -119,8 +119,9 @@
             });
     }
 </script>
-
+</script>
 </body>
 </html>
+
 
 
